@@ -2,6 +2,7 @@ const express = require('express');
 const http = require("http")
 const socketIO = require('socket.io');
 const cors = require('cors');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 
 const app = express();
@@ -15,6 +16,13 @@ const io = socketIO(server, {
 });
 
 app.use(cors()); 
+
+//
+app.use('/api', createProxyMiddleware({ target: 'http://localhost:3000', changeOrigin: true }));
+
+// Todas las demás rutas se reenvían al cliente
+app.use('/', createProxyMiddleware({ target: 'http://localhost:5173', changeOrigin: true }));
+
 
 io.on('connect', (socket) => {
     console.log("Client connected")
@@ -31,6 +39,6 @@ io.on('connect', (socket) => {
     })
 });
 
-server.listen(3000, () => {
-    console.log("Server listening at port 3000");
+server.listen(8080, () => {
+    console.log("Server listening at port 8080");
 });
